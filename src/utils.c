@@ -341,163 +341,227 @@ Public License instead of this License.
 
 */
 
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <locale.h>
+#include <string.h>
 #include <stdarg.h>
-#include <errno.h>
 
 // Define a structure for the generic list node
-typedef struct ListNode {
-    void* data;               // Pointer to the data (void pointer for generic type)
-    struct ListNode* next;    // Pointer to the next node in the list
+typedef struct ListNode
+{
+  void *data;            // Pointer to the data (void pointer for generic type)
+  struct ListNode *next; // Pointer to the next node in the list
 } ListNode;
 
 // Define a structure for the generic list
-typedef struct {
-    ListNode* head;           // Pointer to the first node in the list
-    size_t element_size;      // Size of each element in bytes
-    size_t size;              // Number of elements in the list
+typedef struct
+{
+  ListNode *head;      // Pointer to the first node in the list
+  size_t element_size; // Size of each element in bytes
+  size_t size;         // Number of elements in the list
 } List;
 
 // Function to initialize a new empty list
-List* list_create(size_t element_size) {
-    List* list = (List*)malloc(sizeof(List));
-    if (!list) {
-        perror("Memory allocation failed");
-        return NULL;
-    }
+List *list_create(size_t element_size)
+{
+  List *list = (List *)malloc(sizeof(List));
+  if (!list)
+  {
+    perror("Memory allocation failed");
+    return NULL;
+  }
 
-    list->head = NULL;
-    list->element_size = element_size;
-    list->size = 0;
+  list->head = NULL;
+  list->element_size = element_size;
+  list->size = 0;
 
-    return list;
+  return list;
 }
 
 // Function to free the memory used by a list and all its nodes
-void list_destroy(List* list) {
-    if (!list) return;
+void list_destroy(List *list)
+{
+  if (!list)
+    return;
 
-    ListNode* current = list->head;
-    while (current) {
-        ListNode* next = current->next;
-        free(current->data);    // Free the memory used by the data
-        free(current);          // Free the node
-        current = next;
-    }
+  ListNode *current = list->head;
+  while (current)
+  {
+    ListNode *next = current->next;
+    free(current->data); // Free the memory used by the data
+    free(current);       // Free the node
+    current = next;
+  }
 
-    free(list);                 // Free the list structure itself
+  free(list); // Free the list structure itself
 }
 
 // Function to append a new element to the end of the list
-int list_append(List* list, const void* element) {
-    if (!list || !element) return 0;
+int list_append(List *list, const void *element)
+{
+  if (!list || !element)
+    return 0;
 
-    // Create a new node
-    ListNode* new_node = (ListNode*)malloc(sizeof(ListNode));
-    if (!new_node) {
-        perror("Memory allocation failed");
-        return 0;
+  // Create a new node
+  ListNode *new_node = (ListNode *)malloc(sizeof(ListNode));
+  if (!new_node)
+  {
+    perror("Memory allocation failed");
+    return 0;
+  }
+
+  // Allocate memory for the data and copy the element into it
+  new_node->data = malloc(list->element_size);
+  if (!new_node->data)
+  {
+    perror("Memory allocation failed");
+    free(new_node);
+    return 0;
+  }
+  memcpy(new_node->data, element, list->element_size);
+
+  new_node->next = NULL;
+
+  // Append the new node to the end of the list
+  if (!list->head)
+  {
+    list->head = new_node;
+  }
+  else
+  {
+    ListNode *current = list->head;
+    while (current->next)
+    {
+      current = current->next;
     }
+    current->next = new_node;
+  }
 
-    // Allocate memory for the data and copy the element into it
-    new_node->data = malloc(list->element_size);
-    if (!new_node->data) {
-        perror("Memory allocation failed");
-        free(new_node);
-        return 0;
-    }
-    memcpy(new_node->data, element, list->element_size);
-
-    new_node->next = NULL;
-
-    // Append the new node to the end of the list
-    if (!list->head) {
-        list->head = new_node;
-    } else {
-        ListNode* current = list->head;
-        while (current->next) {
-            current = current->next;
-        }
-        current->next = new_node;
-    }
-
-    list->size++;
-    return 1;
+  list->size++;
+  return 1;
 }
 
 // Function to print all elements in the list
-void list_print(const List* list, void (*print_element)(const void*)) {
-    if (!list || !print_element) return;
+void list_print(const List *list, void (*print_element)(const void *))
+{
+  if (!list || !print_element)
+    return;
 
-    printf("List contents:\n");
+  printf("List contents:\n");
 
-    ListNode* current = list->head;
-    while (current) {
-        print_element(current->data);
-        current = current->next;
-    }
+  ListNode *current = list->head;
+  while (current)
+  {
+    print_element(current->data);
+    current = current->next;
+  }
 }
 
 // Example function to print an integer element
-void print_int(const void* data) {
-    const int* value = (const int*)data;
-    printf("%d ", *value);
+void print_int(const void *data)
+{
+  const int *value = (const int *)data;
+  printf("%d ", *value);
 }
 
 // Example function to print a string element
-void print_string(const void* data) {
-    const char* value = (const char*)data;
-    printf("%s ", value);
+void print_string(const void *data)
+{
+  const char *value = (const char *)data;
+  printf("%s ", value);
 }
 
 // Mini-utils
-void clstreams(){
-  setbuf(stdin,NULL);
-  setbuf(stdout,NULL);
+void clstreams()
+{
+  setbuf(stdin, NULL);
+  setbuf(stdout, NULL);
 }
-void getString(char *str){
-  if(str == NULL && str[0] == '\0'){
+void getString(char *str)
+{
+  if (str == NULL && str[0] == '\0')
+  {
     perror("Invalid strng to get()");
     return;
   }
   clearstreams();
-  if((fgets(str,strlen(str),stdin) == NULL)){
+  if ((fgets(str, strlen(str), stdin) == NULL))
+  {
     perror("Cannot get data from string");
     return;
   }
 }
-char* dstrcat(int num_strings, ...) { // Using dynamic pointer allocation
-    va_list args;
-    va_start(args, num_strings);
+char *dstrcat(int num_strings, ...)
+{ // Using dynamic pointer allocation
+  va_list args;
+  va_start(args, num_strings);
 
-    // Calculate the total length of the concatenated string
-    size_t total_length = 0;
-    for (int i = 0; i < num_strings; ++i) {
-        const char* str = va_arg(args, const char*);
-        total_length += strlen(str);
-    }
+  // Calculate the total length of the concatenated string
+  size_t total_length = 0;
+  for (int i = 0; i < num_strings; ++i)
+  {
+    const char *str = va_arg(args, const char *);
+    total_length += strlen(str);
+  }
 
-    // Allocate memory for the concatenated string (+1 for the null terminator)
-    char* result = (char*)malloc(total_length + 1);
-    if (!result) {
-        va_end(args);
-        perror("malloc()");
-        return NULL; // Memory allocation failed
-    }
-
-    // Copy strings into the allocated memory
-    size_t index = 0;
-    va_start(args, num_strings); // Restart va_list for string copying
-    for (int i = 0; i < num_strings; ++i) {
-        const char* str = va_arg(args, const char*);
-        size_t len = strlen(str);
-        memcpy(result + index, str, len);
-        index += len;
-    }
-    result[index] = '\0'; // Null-terminate the concatenated string
-
+  // Allocate memory for the concatenated string (+1 for the null terminator)
+  char *result = (char *)malloc(total_length + 1);
+  if (!result)
+  {
     va_end(args);
-    return result;
+    perror("malloc()");
+    return NULL; // Memory allocation failed
+  }
+
+  // Copy strings into the allocated memory
+  size_t index = 0;
+  va_start(args, num_strings); // Restart va_list for string copying
+  for (int i = 0; i < num_strings; ++i)
+  {
+    const char *str = va_arg(args, const char *);
+    size_t len = strlen(str);
+    memcpy(result + index, str, len);
+    index += len;
+  }
+  result[index] = '\0'; // Null-terminate the concatenated string
+
+  va_end(args);
+  return result;
 }
+
+#pragma region VALEXIT_DEF
+
+void valexit_generic(const void *generic_ptr)
+{
+  if (NULL == generic_ptr)
+  {
+    fprintf(stderr, "\n[ERROR] utils.h: generic_ptr. EXITING....");
+    exit(EXIT_FAILURE);
+  }
+} // Remember to cast.
+
+void valexit_buffer(const char *buffer)
+{
+  if (NULL == buffer || '\0' == buffer[0])
+  {
+    fprintf(stderr, "\n[ERROR] utils.h: invalid buffer. EXITING....");
+    exit(EXIT_FAILURE);
+  }
+}
+
+void valexit_generic_with_msg(const void *generic_ptr, const char *msg)
+{
+  if (generic_ptr == NULL)
+  {
+    fprintf(stderr, "\n[ERROR] utils.h: generic_ptr NULL. EXITING....");
+    exit(EXIT_FAILURE);
+  }
+
+  valexit_buffer(msg);
+
+  fprintf(stderr, msg);
+  exit(EXIT_FAILURE);
+}
+
+#pragma region VALEXIT_DEF
