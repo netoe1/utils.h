@@ -565,3 +565,34 @@ void valexit_generic_with_msg(const void *generic_ptr, const char *msg)
 }
 
 #pragma region VALEXIT_DEF
+
+#pragma region STRINGS
+
+char *concatStrings(const char *str1, const char *str2)
+{
+  valexit_buffer(str1);
+  valexit_buffer(str2);
+
+  char *ptr = (char *)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
+  ptr[sizeof(ptr)] = '\0';
+
+  int i = 0;
+  int j = 0;
+  for (i = 0; i < sizeof(str1); i++)
+  {
+    ptr[i] = str1[i];
+  }
+
+  for (j = 0; j < sizeof(str2); j++)
+  {
+    if (i == sizeof(ptr))
+    {
+      ptr[sizeof(ptr)] = '\0';
+      break;
+    }
+
+    ptr[++i] = str2[j];
+  }
+}
+
+#pragma region STRINGS
