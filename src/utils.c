@@ -473,7 +473,7 @@ void print_string(const void *data)
 }
 
 // Mini-utils
-void clstreams()
+void clearStreams()
 {
   setbuf(stdin, NULL);
   setbuf(stdout, NULL);
@@ -485,7 +485,7 @@ void getString(char *str)
     perror("Invalid strng to get()");
     return;
   }
-  clearstreams();
+  clearStreams();
   if ((fgets(str, strlen(str), stdin) == NULL))
   {
     perror("Cannot get data from string");
@@ -593,6 +593,13 @@ char *concatStrings(const char *str1, const char *str2)
 
     ptr[++i] = str2[j];
   }
-}
 
+  return ptr;
+}
+void searchNullTerminator(const char *buf)
+{
+  valexit_buffer(buf);
+
+  puts("NULL TERMINATOR DOENST EXISTS!");
+}
 #pragma region STRINGS
