@@ -347,11 +347,9 @@ Public License instead of this License.
 #include <string.h>
 #include <stdarg.h>
 
-
-
-#pragma region CAST_NAMESPACE 
-#define CAST_TO_VOID(ptr) (void*) ptr
-#pragma endregion CAST_NAMESPACE 
+#pragma region CAST_NAMESPACE
+#define CAST_TO_VOID(ptr) (void *)ptr
+#pragma endregion CAST_NAMESPACE
 
 // Define a structure for the generic list node
 typedef struct ListNode
@@ -574,7 +572,7 @@ void valexit_generic_with_msg(const void *generic_ptr, const char *msg)
 
 #pragma region STRINGS
 
-char *concatStrings(const char *str1, const char *str2)
+char *concatStrings(const char *str1, const char *str2) // Remember to free memory!
 {
   valexit_buffer(str1);
   valexit_buffer(str2);
@@ -583,6 +581,17 @@ char *concatStrings(const char *str1, const char *str2)
   if (!ptr)
   {
     valexit_generic_with_msg((void *)ptr, "Cannot malloc this amount of memory.");
+  }
+
+  ptr[(int)sizeof(ptr)] = '\0';
+
+  int ret = sprintf(ptr, "%s%s", str1, str2);
+
+  if (!ret)
+  {
+    valexit_generic_with_msg((void *)ptr, "Error on concat strings");
+    free(ptr);
+    return NULL;
   }
 
   return ptr;
