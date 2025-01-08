@@ -347,6 +347,12 @@ Public License instead of this License.
 #include <string.h>
 #include <stdarg.h>
 
+
+
+#pragma region CAST_NAMESPACE 
+#define CAST_TO_VOID(ptr) (void*) ptr
+#pragma endregion CAST_NAMESPACE 
+
 // Define a structure for the generic list node
 typedef struct ListNode
 {
@@ -564,7 +570,7 @@ void valexit_generic_with_msg(const void *generic_ptr, const char *msg)
   exit(EXIT_FAILURE);
 }
 
-#pragma region VALEXIT_DEF
+#pragma endregion VALEXIT_DEF
 
 #pragma region STRINGS
 
@@ -574,24 +580,9 @@ char *concatStrings(const char *str1, const char *str2)
   valexit_buffer(str2);
 
   char *ptr = (char *)malloc(sizeof(char) * (strlen(str1) + strlen(str2) + 1));
-  ptr[sizeof(ptr)] = '\0';
-
-  int i = 0;
-  int j = 0;
-  for (i = 0; i < sizeof(str1); i++)
+  if (!ptr)
   {
-    ptr[i] = str1[i];
-  }
-
-  for (j = 0; j < sizeof(str2); j++)
-  {
-    if (i == sizeof(ptr))
-    {
-      ptr[sizeof(ptr)] = '\0';
-      break;
-    }
-
-    ptr[++i] = str2[j];
+    valexit_generic_with_msg((void *)ptr, "Cannot malloc this amount of memory.");
   }
 
   return ptr;
@@ -599,7 +590,14 @@ char *concatStrings(const char *str1, const char *str2)
 void searchNullTerminator(const char *buf)
 {
   valexit_buffer(buf);
-
+  for (int i = 0;; i++)
+  {
+    if (buf[i] == '\0')
+    {
+      printf("NULL TERMINATOR IN %d", i);
+      return;
+    }
+  }
   puts("NULL TERMINATOR DOENST EXISTS!");
 }
-#pragma region STRINGS
+#pragma endregion STRINGS
